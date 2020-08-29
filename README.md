@@ -1,7 +1,7 @@
 # minecraft-server-backup
 Simple backup script for servers running in screen using 7zip for compression.
 
-# Prerequisites
+## Prerequisites
 - **p7zip**
 - **cron** or similar (for automatic backups)
 
