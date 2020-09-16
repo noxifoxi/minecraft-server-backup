@@ -23,6 +23,9 @@ if ! pgrep -a java | grep -q $server_jar; then
 		# create screen
 		screen -dmS $screen_name
 
+		# wait for the screen session to get created?
+		sleep 2
+
 		# change directory
 		screen -S $screen_name -p 0 -X stuff "cd $dir^M"
 	fi
