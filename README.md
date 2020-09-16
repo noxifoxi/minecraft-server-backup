@@ -36,5 +36,5 @@ and add:
 
 ```bash
 # check status every 5 minutes
-*/5 * * * * ./minecraft/autostart.sh
+*/5 * * * * ./autostart.sh
 ```
