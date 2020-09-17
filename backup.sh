@@ -13,6 +13,7 @@ start_script="start.sh"
 compression=9 # 0-9
 create_latest=1 # create link to the latest backup (0-1)
 create_lock=1 # create lock file for autostart.sh (0-1)
+keep_backup_days=7 # delete backups older than this in days (0 disables this feature)
 
 
 # create lock file
@@ -71,6 +72,19 @@ if [ $stop_server == 1 ]; then
 else
 # enable auto saving again
 	screen -S $screen_name -p 0 -X stuff "save-on^Msay §aBackup done!^M"
+fi
+
+# delete old backups
+if [ $keep_backup_days -gt 0 ]; then
+	# convert days into seconds
+	keep_backup_days=$(( $keep_backup_days * 86400 ))
+	current_time=`date +%s`
+	for entry in "$backup_path"*.7z
+	do
+		if [ $(( $current_time - $(stat -c "%Y" "$entry") )) -gt $keep_backup_days ]; then
+			rm $entry
+		fi
+	done
 fi
 
 # delete lock file
