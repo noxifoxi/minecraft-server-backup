@@ -2,6 +2,7 @@
 Simple backup script for servers running in screen using 7zip for compression.
 
 ## Prerequisites
+- **screen**
 - **p7zip**
 - **cron** or similar (for automatic backups)
 

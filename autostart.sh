@@ -1,15 +1,16 @@
 #!/bin/bash
 
-# don't execute script if backup is in progress
-[ -f backup.lock ] && exit 0
-
-
 # ======== #
 #  Config  #
 # ======== #
+cd /home/minecraft/ # change working directory where the scripts are located
+
+# don't execute script if backup is in progress
+[ -f backup.lock ] && exit 0
+
 server_jar="fabric-server-launch.jar" # server jar to monitor
 screen_name="minecraft" # name of the screen the server is running
-dir="minecraft" # cd the screen session in this directory
+dir="." # cd the screen session in this directory ("." if no change)
 start_script="start.sh"
 
 

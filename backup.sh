@@ -3,6 +3,7 @@
 # ======== #
 #  Config  #
 # ======== #
+cd /home/minecraft/ # change working directory where the scripts are located
 sleep=10 # wait time for the backup in seconds after the anouncement
 stop_server=0 # 0-1
 source_path="/home/minecraft/server/*"
