@@ -9,11 +9,16 @@ stop_server=0 # 0-1
 source_path="/home/minecraft/server/*"
 backup_path="/media/backupdrive/mc-backup/"
 screen_name="minecraft" # name of the screen the server is running
-start_script="start.sh"
+start_script="start.sh" # autostart.sh also works (if you you use the extra features)
 compression=9 # 0-9
 create_latest=1 # create link to the latest backup (0-1)
 create_lock=1 # create lock file for autostart.sh (0-1)
 keep_backup_days=7 # delete backups older than this in days (0 disables this feature)
+
+
+send_screen(){
+	screen -S $screen_name -p 0 -X stuff "$1^M"
+}
 
 
 # create lock file
@@ -27,11 +32,11 @@ approx_execution_time=5
 # get the previous execution time
 [ -f "backup.time" ] && approx_execution_time=$(<backup.time)
 
-screen -S $screen_name -p 0 -X stuff "say §cBackup in $sleep seconds...^M"
+send_screen "say §cBackup in $sleep seconds..."
 if [ $stop_server == 1 ]; then
-	screen -S $screen_name -p 0 -X stuff "say §eThe server will shutdown for ~$approx_execution_time minutes!^M"
+	send_screen "say §eThe server will shutdown for ~$approx_execution_time minutes!"
 else
-	screen -S $screen_name -p 0 -X stuff "say §eThe server will probably lag for ~$approx_execution_time minutes!^M"
+	send_screen "say §eThe server will probably lag for ~$approx_execution_time minutes!"
 fi
 
 # wait for the configured amount of seconds
@@ -41,15 +46,16 @@ sleep $sleep
 # ==================== #
 #  Backup preparation  #
 # ==================== #
+
 # measure time
 start_time=`date +%s`
 
 if [ $stop_server == 0 ]; then
 # disable auto saving and save world
-	screen -S $screen_name -p 0 -X stuff "save-off^Msave-all^Msay §cWorld backup in progress...^M"
+	send_screen "save-off^Msave-all^Msay §cWorld backup in progress..."
 else
 # stop the server and save world
-	screen -S $screen_name -p 0 -X stuff "stop^M"
+	send_screen "stop"
 fi
 # give server shutdown and world saving a bit of time
 sleep 1
@@ -66,12 +72,16 @@ filename=$backup_path"$(date +%Y-%m-%d-%H%M%S).7z"
 # ============= #
 #  Post backup  #
 # ============= #
+
+# delete lock file
+[ $create_lock == 1 ] && rm backup.lock
+
 if [ $stop_server == 1 ]; then
 # start  the server
-	screen -S $screen_name -p 0 -X stuff "./$start_script^M"
+	send_screen "./$start_script"
 else
 # enable auto saving again
-	screen -S $screen_name -p 0 -X stuff "save-on^Msay §aBackup done!^M"
+	send_screen "save-on^Msay §aBackup done!"
 fi
 
 # delete old backups
@@ -86,9 +96,6 @@ if [ $keep_backup_days -gt 0 ]; then
 		fi
 	done
 fi
-
-# delete lock file
-[ $create_lock == 1 ] && rm backup.lock
 
 # save execution time in minutes
 end_time=`date +%s`
