@@ -9,7 +9,8 @@ stop_server=0 # 0-1
 source_path="/home/minecraft/server/*"
 backup_path="/media/backupdrive/mc-backup/"
 screen_name="minecraft" # name of the screen the server is running
-start_script="start.sh" # autostart.sh also works (if you you use the extra features)
+start_script="start.sh" # "autostart.sh -i" also works (if you you use the extra features)
+start_script_execute_in_screen=1 # for autostart.sh and similar set this to 0
 compression=9 # 0-9
 create_latest=1 # create link to the latest backup (0-1)
 create_lock=1 # create lock file for autostart.sh (0-1)
@@ -65,20 +66,25 @@ sleep 1
 #  Backup  #
 # ======== #
 filename=$backup_path"$(date +%Y-%m-%d-%H%M%S).7z"
-7z a -mx=$compression -bsp0 -bso0 -y $filename $source_path > /dev/null
-[ $create_latest == 1 ] && ln -f $filename $backup_path"latest/backup.7z"
+if [[ "$1" != "-s" ]]; then
+	7z a -mx=$compression -bsp0 -bso0 -y $filename $source_path > /dev/null
+	[ $create_latest == 1 ] && ln -f $filename $backup_path"latest/backup.7z"
+else
+	sleep 10
+fi
 
 
 # ============= #
 #  Post backup  #
 # ============= #
 
-# delete lock file
-[ $create_lock == 1 ] && rm backup.lock
-
 if [ $stop_server == 1 ]; then
-# start  the server
-	send_screen "./$start_script"
+	# start  the server
+	if [[ $start_script_execute_in_screen == 1 ]]; then
+		send_screen "./$start_script"
+	else
+		./$start_script
+	fi
 else
 # enable auto saving again
 	send_screen "save-on^Msay §aBackup done!"
@@ -97,6 +103,11 @@ if [ $keep_backup_days -gt 0 ]; then
 	done
 fi
 
+# delete lock file
+[ $create_lock == 1 ] && rm backup.lock
+
 # save execution time in minutes
 end_time=`date +%s`
-echo $(( ((end_time-start_time)/60)+1 )) > backup.time
+if [[ "$1" != "-s" ]]; then
+	echo $(( ((end_time-start_time)/60)+1 )) > backup.time
+fi

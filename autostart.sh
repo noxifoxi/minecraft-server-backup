@@ -5,8 +5,8 @@
 # ======== #
 cd /home/minecraft/ # change working directory where the scripts are located
 
-# don't execute script if backup is in progress
-[ -f backup.lock ] && exit 0
+# don't execute script if backup is in progress (the -i argument ignores this)
+[[ -f backup.lock && "$1" != "-i" ]] && exit 0
 
 server_jar="fabric-server-launch.jar" # server jar to monitor
 screen_name="minecraft" # name of the screen the server is running
@@ -23,6 +23,13 @@ send_screen(){
 # =========== #
 #  Autostart  #
 # =========== #
+
+# cancel script if autostart.sh is already running
+for pid in $(pidof -x autostart.sh); do
+    if [ $pid != $$ ]; then
+        exit 0
+    fi
+done
 
 # check if minecraft server is not running
 if ! pgrep -a java | grep -q $server_jar; then
